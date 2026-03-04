@@ -1,97 +1,6 @@
-const ServiceKey = "44pk-uopl-cVIp-kayv-pQjd-QdG1-Dns1-adO0-russa-1ov3r";
-const HashCode_Database = "https://hash-code-20ecd-default-rtdb.firebaseio.com/";
-const HashCode_SavedData = "https://raw.githubusercontent.com/MainScripts352/Database/refs/heads/main/Hash%20Code%20Database";
-const SYSTEM_KEY = "02ks-30nd-kanc-lwn5-Il0v3-Russia-382g";
+const Database_Link = "https://key-system-2136f-default-rtdb.firebaseio.com"
+const Database_Key = "xTlsK85HfkZMWbR6CRYIx7olQ6pnVEAp3HYVGcnP"
 
-//-- Encode Decode Word Function
-const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-function toBase32(bytes) {
-  let bits = 0, value = 0, output = '';
-  for (let byte of bytes) {
-    value = (value << 8) | byte;
-    bits += 8;
-    while (bits >= 5) {
-      output += base32Alphabet[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) {
-    output += base32Alphabet[(value << (5 - bits)) & 31];
-  }
-  return output;
-}
-
-function fromBase32(str) {
-  let bits = 0, value = 0, output = [];
-  for (let c of str.toUpperCase()) {
-    const index = base32Alphabet.indexOf(c);
-    if (index === -1) continue;
-    value = (value << 5) | index;
-    bits += 5;
-    if (bits >= 8) {
-      output.push((value >>> (bits - 8)) & 255);
-      bits -= 8;
-    }
-  }
-  return new Uint8Array(output);
-}
-
-function EncodeText(text, key) {
-  const data = new TextEncoder().encode(text);
-  const keyData = new TextEncoder().encode(key);
-  const encrypted = data.map((b, i) => b ^ keyData[i % keyData.length]);
-  return toBase32(encrypted);
-}
-
-function DecodeText(encoded, key) {
-  const data = fromBase32(encoded);
-  const keyData = new TextEncoder().encode(key);
-  const decrypted = data.map((b, i) => b ^ keyData[i % keyData.length]);
-  return new TextDecoder().decode(new Uint8Array(decrypted));
-}
-//--
-
-
-function _getKeyBytes(key) {
-  return new TextEncoder().encode(key);
-}
-
-function _bytesToString(bytes) {
-  if (typeof TextDecoder !== "undefined") {
-    return new TextDecoder().decode(bytes);
-  }
-  return Buffer.from(bytes).toString("utf-8");
-}
-
-function encodeWithSystemKey(message) {
-  if (typeof message !== "string") throw new TypeError("message must be a string");
-  const keyBytes = _getKeyBytes(SYSTEM_KEY);
-  const msgBytes = new TextEncoder().encode(message);
-  const keyLen = keyBytes.length;
-  let hex = "";
-  for (let i = 0; i < msgBytes.length; i++) {
-    const xored = msgBytes[i] ^ keyBytes[i % keyLen];
-    hex += xored.toString(16).padStart(2, "0");
-  }
-  return hex;
-}
-
-function decodeWithSystemKey(hexstr) {
-  if (typeof hexstr !== "string") throw new TypeError("hexstr must be a string");
-  if (hexstr.length % 2 !== 0) throw new Error("Invalid hex string length");
-  const keyBytes = _getKeyBytes(SYSTEM_KEY);
-  const keyLen = keyBytes.length;
-  const byteLen = hexstr.length / 2;
-  let outBytes = new Uint8Array(byteLen);
-  for (let i = 0; i < byteLen; i++) {
-    const pair = hexstr.substr(i * 2, 2);
-    const num = parseInt(pair, 16);
-    if (Number.isNaN(num)) throw new Error("Invalid hex characters in input");
-    const k = keyBytes[i % keyLen];
-    outBytes[i] = num ^ k;
-  }
-  return _bytesToString(outBytes);
-}
 
 // Get timestamp with days expiration
 function getTimestamp(days = 0) {
@@ -100,9 +9,29 @@ function getTimestamp(days = 0) {
   return now + add;
 }
 
+// Remove Data from Database function
+async function RemoveData(key) {
+  const res = await fetch(`${Database_Link}/Keys/${key}.json?auth=${Database_Key}`, {
+    method: 'DELETE',
+    headers: {"Content-Type": "application/json"},
+    body: null
+  })
+}
+
+// Add Data to Database function
+async function AddData(key, time) {
+  const res = await fetch(`${Database_Link}/Keys/${key}.json?auth=${Database_Key}`, {
+    method: 'PUT',
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      expiration: time 
+    })
+  })
+}
+
 
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const domain = url.origin; // get service full link
     const path = url.pathname.split("/").filter(Boolean);
@@ -112,14 +41,14 @@ export default {
     // Make Key Starter
     if (path[0] === "make" && method === "GET") {
       const timestamp = await getTimestamp(1);
-      return Response.redirect(`${domain}/create/${btoa(timestamp)}`, 302);
+      const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
+      ctx.waitUntil(AddData(key, timestamp)); // code below it will run imidietly without waiting it finished
+      return Response.redirect(`${domain}/create/${key}`, 302);
     }
     
     // Create Key (always expires in 24h)
     if (path[0] === "create" && path[1] && method === "GET") {
-      const encodedkey = atob(path[1]);
-      const key = encodeWithSystemKey(String(encodedkey));
-
+      const key = path[1];
       const html = `
       <!DOCTYPE html>
 <html lang="en">
@@ -231,15 +160,18 @@ export default {
     if (path[0] === "check" && path[1] && method === "GET") {
       let key = path[1];
       key = key.replace("KEY_", "");
-      return new Response(decodeWithSystemKey(key), {
-        headers: { "Content-Type": "text/plain" }
-      });
-    }
-
-    // Get Time
-    if (path[0] === "time" && method === "GET") {
+      const res = await fetch(`${Database_Link}/Keys/${key}.json`);
+      const result = await res.json();
+      if (result === null) {
+        return new Response("403: Invalid Key", { status: 403 });
+      }
+      const expiration = result.expiration;
       const time = getTimestamp();
-      return new Response(String(time), {
+      if (Number(expiration) < time) {
+        ctx.waitUntil(RemoveData(key)); // code below it will run imidietly without waiting it finished
+        return new Response("403: Key Expired", { status: 403 });
+      }
+      return new Response('200: Success', {
         headers: { "Content-Type": "text/plain" }
       });
     }
@@ -250,7 +182,7 @@ export default {
         headers: { "Content-Type": "text/plain" }
       });
     }
-    
+
     return new Response("404: Not found", { status: 404 });
   }
 };
