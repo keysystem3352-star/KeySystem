@@ -9,6 +9,26 @@ function getTimestamp(days = 0) {
   return now + add;
 }
 
+// Remove All Expired Data from Database function
+async function ClearExpiredData() {
+  const res = await fetch(`${Database_Link}/Keys.json`);
+  const data = await res.json();
+  if (!data) return
+  const now = Date.now();
+  for (const key in data) {
+    const keyData = data[key];
+    let expires = keyData.expiration;
+    if (!expires) continue;
+    if (Number(expires) <= now) {
+      await fetch(`${Database_Link}/Keys/${key}.json?auth=${Database_Key}`, {
+        method: 'DELETE',
+        headers: {"Content-Type": "application/json"},
+        body: null
+      })
+    }
+  }
+}
+
 // Remove Data from Database function
 async function RemoveData(key) {
   const res = await fetch(`${Database_Link}/Keys/${key}.json?auth=${Database_Key}`, {
@@ -169,6 +189,7 @@ export default {
       const time = getTimestamp();
       if (Number(expiration) < time) {
         ctx.waitUntil(RemoveData(key)); // code below it will run imidietly without waiting it finished
+        ctx.waitUntil(ClearExpiredData()); // code below it will run imidietly without waiting it finished
         return new Response("403: Key Expired", { status: 403 });
       }
       return new Response('200: Success', {
