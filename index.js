@@ -166,6 +166,9 @@ export default {
         copyBtn.innerText = "Copied!";
         setTimeout(() => copyBtn.innerText = "Copy Key", 2000);
       });
+      // Adsterra Earn Money by Ads
+      window.location.href = "https://www.effectivegatecpm.com/hag5evww?key=05011499f496163c6920944e9dd8a866";
+      //
     }
   </script>
 </body>
