@@ -58,10 +58,9 @@ export default {
     const method = request.method;
     const ip = request.headers.get("CF-Connecting-IP") || "Unknown";
     const referer = request.headers.get("referer"); // get 1st link to redirected link
-    const from = url.searchParams.get("from"); // get request from
     
     // Make Key Starter
-    if (path[0] === "make" && method === "GET" && referer && from === "redirect") {
+    if (path[0] === "make" && method === "GET" && referer) {
       const timestamp = await getTimestamp(1);
       const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
       ctx.waitUntil(AddData(key, timestamp)); // code below it will run imidietly without waiting it finished
