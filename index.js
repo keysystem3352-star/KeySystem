@@ -140,9 +140,9 @@ export default {
 </head>
 <body>
 
-  // Adsterra Earn Money by Ads
+  <!-- Adsterra to Earn Money -->
   <script src="https://pl28955444.profitablecpmratenetwork.com/fc/15/9f/fc159feae31d894d63a77a384f0bc8f3.js"></script>
-  //
+  <!-- -->
   
   <div class="container">
     <div class="title">Your Access Key</div>
