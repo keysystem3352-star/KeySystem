@@ -39,12 +39,13 @@ async function RemoveData(key) {
 }
 
 // Add Data to Database function
-async function AddData(key, time) {
+async function AddData(key, time, country_code) {
   const res = await fetch(`${Database_Link}/Keys/${key}.json?auth=${Database_Key}`, {
     method: 'PUT',
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      expiration: time 
+      expiration: time,
+      country_code: country_code
     })
   })
 }
@@ -64,7 +65,7 @@ export default {
     if (path[0] === "make" && method === "GET" && referer) {
       const timestamp = await getTimestamp(1);
       const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
-      ctx.waitUntil(AddData(key, timestamp)); // code below it will run imidietly without waiting it finished
+      ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
       return Response.redirect(`${domain}/create/${key}`, 302);
     }
     
