@@ -200,26 +200,26 @@ export default {
       const res = await fetch(`${Database_Link}/Keys/${key}.json`);
       const result = await res.json();
       if (result === null) {
-        return new Response("403: Invalid Key", { status: 403, headers: corsHeaders });
+        return new Response("403: Invalid Key", { status: 403, headers: {..corsHeaders, "Content-Type": "text/plain" }});
       }
       const expiration = result.expiration;
       const time = getTimestamp();
       if (Number(expiration) < time) {
         ctx.waitUntil(RemoveData(key)); // code below it will run imidietly without waiting it finished
         ctx.waitUntil(ClearExpiredData()); // code below it will run imidietly without waiting it finished
-        return new Response("403: Key Expired", { status: 403, headers: corsHeaders });
+        return new Response("403: Key Expired", { status: 403, headers: {..corsHeaders, "Content-Type": "text/plain" }});
       }
       if ("country_code" in result && countryCode !== result.country_code) {
-        return new Response("400: Bad Request", { status: 400, headers: corsHeaders });
+        return new Response("400: Bad Request", { status: 400, headers: {..corsHeaders, "Content-Type": "text/plain" }});
       }
-      return new Response('200: Success', { status: 200, headers: corsHeaders });
+      return new Response('200: Success', { status: 200, headers: {..corsHeaders, "Content-Type": "text/plain" }});
     }
     
     // Check Service Status
     if (path[0] === "status" && method === "GET") {
-      return new Response(true, { status: 200, headers: corsHeaders });
+      return new Response(true, { status: 200, headers: corsHeaders, "Content-Type": "text/plain" });
     }
 
-    return new Response("404: Not found", { status: 404, headers: corsHeaders });
+    return new Response("404: Not found", { status: 404, headers: {..corsHeaders, "Content-Type": "text/plain" }});
   }
 };
