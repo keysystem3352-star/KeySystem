@@ -114,29 +114,19 @@ export default {
     const ip = request.headers.get("CF-Connecting-IP") || "Unknown";
     const countryCode = request.headers.get("CF-IPCountry") || "Unknown";
     const referer = request.headers.get("referer"); // get 1st link to redirected link
-    const fingerprint = url.searchParams.get("fp"); // get fp query '?fp=BMW'
-
     
-    // Generate Shrink.Pe Link
-    if (path[0] === "shrinkpe" && method === "GET" && fingerprint) {
-      const res = await fetch(`https://shrink.pe/api?api=34ae6623373d076be352bf97aec01e5e429fc10e&url=${domain}/generate?fp=${fingerprint}`);
-      const json = await res.json();
-      return new Response(json.shortenedUrl, { status: 200, headers: {...corsHeaders, "Content-Type": "text/plain" }});
-    }
-
     
     // Generate Key Starter
-    if (path[0] === "generate" && method === "GET" && referer && fingerprint) {
+    if (path[0] === "generate" && method === "GET" && referer) {
       const timestamp = getTimestamp(1);
       const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
       ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
-      return Response.redirect(`${domain}/show/${key}?fp=${EncodeText(fingerprint, ServiceKey)}`, 302);
+      return Response.redirect(`${domain}/show/${key}`, 302);
     }
 
 
     // Show Key (always expires in 24h)
-    if (path[0] === "show" && path[1] && method === "GET" && fingerprint) {
-      const fp = DecodeText(fingerprint, ServiceKey);
+    if (path[0] === "show" && path[1] && method === "GET") {
       const key = path[1];
       const html = `
       <!DOCTYPE html>
@@ -251,22 +241,11 @@ export default {
     <div class="title">Your Access Key</div>
     <div class="divider"></div>
 
-    <div class="key-text" id="keyText">Loading..</div>
+    <div class="key-text" id="keyText">KEY_${key}</div>
 
     <button id="copyBtn" onclick="copyKey()">Copy Key</button>
   </div>
 
-  <script type="module">
-    import FingerprintJS from 'https://openfpcdn.io/fingerprintjs/v5';  
-    const fp = await FingerprintJS.load();  
-    const result = await fp.get();
-    const keyText = document.getElementById("keyText");
-    if (result.visitorId === "${fp}") {
-       keyText.innerText = "KEY_${key}";
-    } else {
-       keyText.innerText = "Bad Request!";
-    }
-  </script>
   
   <script>
     function copyKey() {
@@ -294,6 +273,7 @@ export default {
         "https://socialconventcontext.com/vcpfaz6mqh?key=1c1cb4fb07424cd21d64a1f69374af54";
     }
   </script>
+
 
   <!-- BOTTOM BANNER -->
   <div class="bottom-banner">
