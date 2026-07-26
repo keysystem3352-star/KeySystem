@@ -114,11 +114,16 @@ export default {
     const ip = request.headers.get("CF-Connecting-IP") || "Unknown";
     const countryCode = request.headers.get("CF-IPCountry") || "Unknown";
     const referer = request.headers.get("referer"); // get 1st link to redirected link
+    const halfday = url.searchParams.get("halfday") || ''; // get key in '?halfday=true'
     
+
     
     // Generate Key Starter
     if (path[0] === "generate" && method === "GET" && referer) {
-      const timestamp = getTimestamp(1);
+      let timestamp = getTimestamp(1); // get current time with 24 hours advanced
+      if (halfday && halfday === "true") {
+        timestamp = getTimestamp(0.5); // get current time with 12 hours advanced
+      }
       const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
       ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
       return Response.redirect(`${domain}/show/${key}`, 302);
@@ -325,6 +330,7 @@ export default {
       return new Response("true", { status: 200, headers: {...corsHeaders, "Content-Type": "text/plain" }});
     }
 
+    
     return new Response("404: Not found", { status: 404, headers: {...corsHeaders, "Content-Type": "text/plain" }});
   }
 };
