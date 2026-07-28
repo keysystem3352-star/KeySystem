@@ -114,15 +114,15 @@ export default {
     const ip = request.headers.get("CF-Connecting-IP") || "Unknown";
     const countryCode = request.headers.get("CF-IPCountry") || "Unknown";
     const referer = request.headers.get("referer"); // get 1st link to redirected link
-    const halfday = url.searchParams.get("halfday") || ''; // get key in '?halfday=true'
+    const fewhours = url.searchParams.get("4hours") || ''; // get key in '?4hours=true'
     
 
     
     // Generate Key Starter
     if (path[0] === "generate" && method === "GET" && referer) {
       let timestamp = getTimestamp(1); // get current time with 24 hours advanced
-      if (halfday && halfday === "true") {
-        timestamp = getTimestamp(0.5); // get current time with 12 hours advanced
+      if (fewhours && fewhours === "true") {
+        timestamp = getTimestamp(0.1666666667); // get current time with 4 hours advanced
       }
       const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
       ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
