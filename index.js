@@ -319,9 +319,6 @@ export default {
         ctx.waitUntil(ClearExpiredData()); // code below it will run imidietly without waiting it finished
         return new Response("403: Key Expired", { status: 403, headers: {...corsHeaders, "Content-Type": "text/plain" }});
       }
-      if ("country_code" in result && countryCode !== result.country_code) {
-        return new Response("400: Bad Request", { status: 400, headers: {...corsHeaders, "Content-Type": "text/plain" }});
-      }
       return new Response('200: Success', { status: 200, headers: {...corsHeaders, "Content-Type": "text/plain" }});
     }
     
