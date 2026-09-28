@@ -275,7 +275,7 @@ export default {
         }, 2000);
       });
       window.location.href =
-        "https://socialconventcontext.com/vcpfaz6mqh?key=1c1cb4fb07424cd21d64a1f69374af54";
+        "https://asiafilm.org/4/1c1cb4fb07424cd21d64a1f69374af54";
     }
   </script>
 
