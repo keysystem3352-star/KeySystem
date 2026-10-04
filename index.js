@@ -238,7 +238,7 @@ export default {
         'params' : {}
       };
     </script>
-    <script src="https://www.highperformanceformat.com/cc37eb734388c1a88867aeca92b43ee9/invoke.js"></script>
+    <script src="https://bauval.org/22/cc37eb734388c1a88867aeca92b43ee9"></script>
   </div>
 
   <!-- KEY BOX -->
@@ -282,16 +282,16 @@ export default {
 
   <!-- BOTTOM BANNER -->
   <div class="bottom-banner">
-  <script>
-    atOptions = {
-      'key' : 'e57b92dbfcd6136f0f52a6b143c3abbb',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script src="https://www.highperformanceformat.com/e57b92dbfcd6136f0f52a6b143c3abbb/invoke.js"></script>
+    <script>
+      atOptions = {
+        'key' : 'e57b92dbfcd6136f0f52a6b143c3abbb',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script src="https://bauval.org/22/e57b92dbfcd6136f0f52a6b143c3abbb"></script>
   </div>
 
 </body>
