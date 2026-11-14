@@ -119,15 +119,35 @@ export default {
 
     
     // Generate Key Starter
-    if (path[0] === "8a2f56" || path[0] === "generate") {
+    if (path[0] === "8a2f56" || path[0] === "make") {
       if (method === "GET" && referer) {
         let timestamp = getTimestamp(1); // get current time with 24 hours advanced
         if (path[0] === "8a2f56") {
           if (fewhours && fewhours === "true") {
             timestamp = getTimestamp(0.1666666667); // get current time with 4 hours advanced
           }         
-        } else if (path[0] === "generate") {
-          
+        } else if (path[0] === "make") {
+          const turnstileToken = path[1];
+          if (!turnstileToken) {
+            return new Response(`Missing Verification!`, { 
+              status: 403,
+              headers: corsHeaders
+            });
+          }
+          const formData = new FormData();
+          formData.append("secret", "0x4AAAAAADqBnllIHJrdP6W4rw2rb1zvDRw");
+          formData.append("response", turnstileToken);
+          const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+            method: "POST",
+            body: formData
+          });
+          const result = await verify.json();
+          if (!result.success) {
+            return new Response("Verification Failed!", {
+              status: 403,
+              headers: corsHeaders
+            });
+          }
         }
         const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
         ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
