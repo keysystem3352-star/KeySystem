@@ -119,15 +119,22 @@ export default {
 
     
     // Generate Key Starter
-    if (path[0] === "generate" && method === "GET" && referer) {
-      let timestamp = getTimestamp(1); // get current time with 24 hours advanced
-      if (fewhours && fewhours === "true") {
-        timestamp = getTimestamp(0.1666666667); // get current time with 4 hours advanced
+    if (path[0] === "8a2f56" || path[0] === "generate") {
+      if (method === "GET" && referer) {
+        let timestamp = getTimestamp(1); // get current time with 24 hours advanced
+        if (path[0] === "8a2f56") {
+          if (fewhours && fewhours === "true") {
+            timestamp = getTimestamp(0.1666666667); // get current time with 4 hours advanced
+          }         
+        } else if (path[0] === "generate") {
+          
+        }
+        const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
+        ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
+        return Response.redirect(`${domain}/show/${key}`, 302);
       }
-      const key = crypto.randomUUID().replace(/-/g, "").slice(0, 26);
-      ctx.waitUntil(AddData(key, timestamp, countryCode)); // code below it will run imidietly without waiting it finished
-      return Response.redirect(`${domain}/show/${key}`, 302);
     }
+    
 
 
     // Show Key (always expires in 24h)
