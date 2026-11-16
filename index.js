@@ -336,7 +336,7 @@ export default {
       key = key.replace("KEY_", "");
       const res = await fetch(`${Database_Link}/Keys/${key}.json`);
       const result = await res.json();
-      if (result === null) {
+      if (result === null || key.includes(".")) {
         return new Response("403: Invalid Key", { status: 403, headers: {...corsHeaders, "Content-Type": "text/plain" }});
       }
       const expiration = result.expiration;
